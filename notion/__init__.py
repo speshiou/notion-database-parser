@@ -42,7 +42,7 @@ class NotionParser:
         return records
 
     def get_record(self, result):
-        record = {}
+        record = {"id": result["id"]}
         for name in result["properties"]:
             if self.is_supported(result["properties"][name]):
                 record[name] = self.get_property_value(result["properties"][name])
@@ -59,6 +59,7 @@ class NotionParser:
             "rich_text",
             "title",
             "multi_select",
+            "relation",
         ]:
             return True
         else:
@@ -72,6 +73,8 @@ class NotionParser:
             return self.get_date(prop)
         elif prop_type == "multi_select":
             return self.get_selections(prop)
+        elif prop_type == "relation":
+            return self.get_relations(prop)
         else:
             return prop.get(prop_type)
 
@@ -93,8 +96,14 @@ class NotionParser:
                 return end - start
         return None
 
-    def get_selections(self, date_object):
+    def get_selections(self, data):
         selections = []
-        for selection in date_object.get("multi_select"):
+        for selection in data.get("multi_select"):
             selections.append(selection["name"])
         return selections
+
+    def get_relations(self, data):
+        relations = []
+        for relation in data.get("relation"):
+            relations.append(relation["id"])
+        return relations
